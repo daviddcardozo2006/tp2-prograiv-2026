@@ -30,3 +30,44 @@ describe('GET /notes/:id (Ejercicio 3)', () => {
     expect(res.body).toEqual({ error: 'NotFound' });
   });
 });
+
+describe('PATCH /notes/:id (Ejercicio 4)', () => {
+  it('200 y cambia solo los campos enviados', async () => {
+    const { body: creada } = await request(app)
+      .post('/notes')
+      .send({ title: 'Comprar pan', content: 'Antes de las 20hs' });
+
+    const res = await request(app).patch(`/notes/${creada.id}`).send({ content: 'Antes de las 21hs' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.title).toBe('Comprar pan');
+    expect(res.body.content).toBe('Antes de las 21hs');
+  });
+
+  it('el cambio se ve en un GET posterior', async () => {
+    const { body: creada } = await request(app).post('/notes').send({ title: 'A', content: 'B' });
+
+    const { body: actualizada } = await request(app).patch(`/notes/${creada.id}`).send({ pinned: true });
+    const res = await request(app).get(`/notes/${creada.id}`);
+
+    expect(res.body).toEqual(actualizada);
+  });
+
+  it('404 si el id no existe', async () => {
+    await request(app).post('/notes').send({ title: 'A', content: 'B' });
+
+    const res = await request(app).patch('/notes/999').send({ title: 'X' });
+
+    expect(res.status).toBe(404);
+    expect(res.body).toEqual({ error: 'NotFound' });
+  });
+
+  it('400 si el body es inválido', async () => {
+    const { body: creada } = await request(app).post('/notes').send({ title: 'A', content: 'B' });
+
+    const res = await request(app).patch(`/notes/${creada.id}`).send({ title: '' });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('ValidationError');
+  });
+});
