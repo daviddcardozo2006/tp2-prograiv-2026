@@ -23,7 +23,12 @@ describe('NoteService - Notificaciones (Ejercicio 6)', () => {
     service.createNote({ title: 'Nota importante', content: 'Urgente', pinned: true });
 
     expect(notify).toHaveBeenCalledTimes(1);
-    expect(notify).toHaveBeenCalledWith(expect.stringContaining('Nota importante'));
+    expect(notify).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Nota importante',
+        pinned: true,
+      })
+    );
   });
 
   it('no llama a notify si se crea una nota con pinned: false u omitido', () => {
@@ -31,4 +36,4 @@ describe('NoteService - Notificaciones (Ejercicio 6)', () => {
 
     expect(notify).not.toHaveBeenCalled();
   });
-}); 
+});
