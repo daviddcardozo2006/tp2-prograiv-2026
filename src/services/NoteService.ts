@@ -40,7 +40,13 @@ export class NoteServiceImpl implements NoteService {
   }
 
   updateNote(id: number, patch: NotePatch): Note | undefined {
-    return this.repo.update(id, patch);
+    const before = this.repo.findById(id);
+    const updated = this.repo.update(id, patch);
+    if (updated && patch.pinned && !before?.pinned) {
+      notify(updated);
+    }
+
+    return updated;
   }
 
   deleteNote(id: number): boolean {
